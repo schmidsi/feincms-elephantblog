@@ -21,15 +21,9 @@ def entry(request, year, month, day, slug, language_code=None, template_name='bl
                                published_on__month=month,
                                published_on__day=day,
                                slug=slug)
-    '''
-    if this app runs without ApplicationContent integration we have to make sure
-    the template extends from the basic_template so we prepend 'standalone/'
-    to the template_name
-    '''
-    if recognize_app_content(request):
-        template_name = '/'.join(['standalone', template_name,])
-        extra_context.update({'base_template': settings.BLOG_BASE_TEMPLATE})
-    
+
+    extra_context.update({'base_template': base_template(request, template_name)})
+
     if not entry.isactive() and not request.user.is_authenticated():
         raise Http404
     else:
@@ -86,14 +80,7 @@ def entry_list(request, category=None, year=None, month=None, day=None, page=0,
     extra_context.update({'date':date(int(year), int(month), int(day)),
                           'comments' : settings.BLOG_COMMENTS})
 
-    '''
-    if this app runs without ApplicationContent integration we have to make sure
-    the template extends from the basic_template so we prepend 'standalone/'
-    to the template_name
-    '''
-    if recognize_app_content(request):
-        template_name = '/'.join(['standalone', template_name,])
-        extra_context.update({'base_template': settings.BLOG_BASE_TEMPLATE})
+    extra_context.update({'base_template': base_template(request, template_name)})
 
     return list_detail.object_list(
       request,
@@ -106,3 +93,27 @@ def entry_list(request, category=None, year=None, month=None, day=None, page=0,
 
 def recognize_app_content(request):
     return getattr(request, '_feincms_appcontent_parameters', False) == False and not getattr(request, '_feincms_extra_context',{}).has_key('in_appcontent_subpage')
+
+'''
+if this app runs without ApplicationContent integration we have to make sure
+the template extends from the basic_template so we prepend 'standalone/'
+to the template_name
+'''
+def base_template(request, template_name):
+    if recognize_app_content(request):
+        return settings.BLOG_BASE_TEMPLATE
+    else:
+        return get_naked_template(template_name)
+
+from django.template.loader import get_template 
+from django.template import Template, NodeList
+from django.template.loader_tags import BlockNode
+
+'''
+extract block tags from template
+'''
+def get_naked_template(template_name):
+    template = get_template(template_name)
+    naked_template = Template('')
+    naked_template.nodelist = NodeList(template.nodelist.get_nodes_by_type(BlockNode))
+    return naked_template

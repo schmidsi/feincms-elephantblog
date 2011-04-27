@@ -14,7 +14,7 @@ from models import Entry
 import settings
 
 def entry(request, year, month, day, slug, language_code=None, template_name='blog/entry_detail.html', **kwargs):
-    context={}
+    extra_context={}
 
     entry = get_object_or_404(Entry.objects.select_related(), 
                               published_on__year=year,
@@ -28,15 +28,16 @@ def entry(request, year, month, day, slug, language_code=None, template_name='bl
     '''
     if recognize_app_content(request):
         template_name = '/'.join(['standalone', template_name,])
+        extra_context.update({'base_template': settings.BLOG_BASE_TEMPLATE})
     
     if not entry.isactive() and not request.user.is_authenticated():
         raise Http404
     else:
-        extra_context = {
+        extra_context.update({
                          'entry':entry, 
                          'date': date(int(year), int(month),int(day)),
                          'comments' : settings.BLOG_COMMENTS,
-                         }
+                         })
 
         return render_to_response(template_name, extra_context, 
                                   context_instance=RequestContext(request))
@@ -92,7 +93,7 @@ def entry_list(request, category=None, year=None, month=None, day=None, page=0,
     '''
     if recognize_app_content(request):
         template_name = '/'.join(['standalone', template_name,])
-        #print request._feincms_extra_context
+        extra_context.update({'base_template': settings.BLOG_BASE_TEMPLATE})
 
     return list_detail.object_list(
       request,

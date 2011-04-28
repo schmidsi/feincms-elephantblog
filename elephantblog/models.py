@@ -18,7 +18,7 @@ from feincms.module.page.extensions.navigation import NavigationExtension, PageP
 from feincms.translations import TranslatedObjectMixin, Translation, \
     TranslatedObjectManager
 from feincms.content.application.models import reverse
-
+from feincms.content.medialibrary.models import MediaFileContent
 from feincms.module.page.extensions.navigation import NavigationExtension,\
     PagePretender
 
@@ -227,6 +227,13 @@ class Entry(Base):
 
     def __unicode__(self):
         return unicode(self.title)
+    
+    @property
+    def mediafile(self):
+        try:
+            return self.content.all_of_type(MediaFileContent)[0].mediafile
+        except IndexError:
+            return
 
     def save(self, *args, **kwargs):
         if self.published >= self.CLEARED and self._old_published < self.CLEARED and self.published_on.date() <= datetime.now().date(): # only sets the publish date if the entry is published

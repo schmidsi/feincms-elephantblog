@@ -21,13 +21,12 @@ class BlogListRenderRegionNode(RenderRegionNode):
             list_detail_content = u''
         
         '''
-        first we try to find a mediafile in a MediaFileContent
-        if we have no luck, we try to find a mediafiel in a GalleryContent
+        trying to find a MediaFileContent 
         '''
         try:
             media_file_content = feincms_object.content.all_of_type(MediaFileContent)[0].mediafile
         except IndexError:
-            media_file_content = False
+            media_file_content = None
         
         context.update({
             'content': list_detail_content,

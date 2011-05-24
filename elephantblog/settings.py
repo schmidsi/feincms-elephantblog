@@ -19,3 +19,7 @@ BLOG_DESCRIPTION = getattr(settings, 'BLOG_DESCRIPTION',
 # Set pagination for elephantblog.views.entry_list, None to use default from 
 # entry_dict
 BLOG_LIST_PAGINATION = getattr(settings, 'BLOG_LIST_PAGINATION', None)
+
+# if blog runs as standalone (not as FeinCMS ApplicationContent) you can
+# set your base template. the blog templates will extend this template.
+BLOG_BASE_TEMPLATE = getattr(settings, 'BLOG_BASE_TEMPLATE', 'base.html')

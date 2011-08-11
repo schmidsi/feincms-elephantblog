@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.db import models
 from django.template.loader import render_to_string
+from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 
 from elephantblog.models import Category, Entry
@@ -22,3 +25,30 @@ class EntryTeaserContent(models.Model):
         
         return render_to_string('content/blog/entry_teaser.html', 
                                 {'content' : self, 'entries' : entries})
+
+
+class BlogDateFilterContent(models.Model):
+    class Meta:
+        abstract = True
+        verbose_name = _('Blog date filter content')
+        verbose_name_plural = _('Blog date filter contents')
+    
+    def render(self, **kwargs):
+        dates_dict = SortedDict()
+        entry_dates = Entry.objects.active().order_by('published_on')\
+                                   .values_list('published_on', flat=True)
+        
+        for date in entry_dates:
+            if not date.year in dates_dict:
+                dates_dict[date.year] = SortedDict({'date' : datetime(date.year, 1, 1),
+                                                    'months' : SortedDict()})
+            if not date.month in dates_dict[date.year]['months']:
+                dates_dict[date.year]['months'][date.month] = \
+                    SortedDict({'date' : datetime(date.year, date.month, 1),
+                                'days' : SortedDict()})
+            if not date.day in dates_dict[date.year]['months'][date.month]['days']:
+                dates_dict[date.year]['months'][date.month]['days'][date.day] = \
+                    SortedDict({'date' : datetime(date.year, date.month, date.day)})
+        
+        return render_to_string('content/blog/date_filter.html', 
+                                {'content' : self, 'dates_dict' : dates_dict})

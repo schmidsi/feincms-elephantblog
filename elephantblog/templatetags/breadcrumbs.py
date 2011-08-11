@@ -26,16 +26,16 @@ def drilldown(date, mode):
     all, year, month, day = None, None, None, None
     if mode == 'day':
         day = Link('%02d'%date.day)
-        #day.url = reverse('elephantblog_list', kwargs={'year':date.year, 'month':'%02d'%date.month, 'day':'%02d'%date.day}, current_app='elephantblog')
-        day.url = '%s%s/%02d/%02d/' % (reverse('elephantblog_list'), date.year, date.month, date.day)
+        day.url = reverse('elephantblog_day_list', kwargs={'year':date.year, 'month':'%02d'%date.month, 'day':'%02d'%date.day}, current_app='elephantblog')
+        #day.url = '%s%s/%02d/%02d/' % (reverse('elephantblog_list'), date.year, date.month, date.day)
     if mode in ['month', 'day']:
         month = Link(date.strftime('%B')) #Locale full month name
-        #month.url =  reverse('elephantblog_list', kwargs={'year':date.year, 'month':'%02d'%date.month}, current_app='elephantblog')
-        month.url = '%s%s/%02d/' % (reverse('elephantblog_list'), date.year, date.month)
+        month.url =  reverse('elephantblog_month_list', kwargs={'year':date.year, 'month':'%02d'%date.month}, current_app='elephantblog')
+        #month.url = '%s%s/%02d/' % (reverse('elephantblog_list'), date.year, date.month)
     if mode in ['year', 'month', 'day']:
         year = Link(date.year)
-        #year.url = reverse('elephantblog_list', kwargs={'year':date.year,}, current_app='elephantblog')
-        year.url = '%s%s/' % (reverse('elephantblog_list'), date.year)
+        year.url = reverse('elephantblog_year_list', kwargs={'year':date.year,}, current_app='elephantblog')
+        #year.url = '%s%s/' % (reverse('elephantblog_list'), date.year)
     root = Link(_('All'))  #Needs ugettext    
     root.url = reverse('elephantblog_list', current_app='elephantblog')
     return {'root': root, 'year':year, 'month':month, 'day':day}

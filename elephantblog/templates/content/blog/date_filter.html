@@ -1,0 +1,29 @@
+<div class="blog-date-filter">
+    {% if dates_dict %}
+    <ul>
+        {% for year, months in dates_dict.items %}
+        <li>
+            <a href="{% url elephantblog.urls/elephantblog_year_list year=year %}">{{ year }}</a>
+            {% if months %}
+            <ul>
+                {% for month, days in months.items %}
+                <li>
+                    <a href="{% url elephantblog.urls/elephantblog_month_list year=year month=month|stringformat:"02d" %}">{{ month }}</a>
+                    {% if days %}
+                    <ul>
+                        {% for day, empty in days.items %}
+                        <li>
+                            <a href="{% url elephantblog.urls/elephantblog_day_list year=year month=month|stringformat:"02d" day=day|stringformat:"02d" %}">{{ day }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>

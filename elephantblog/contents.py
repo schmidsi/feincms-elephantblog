@@ -35,7 +35,7 @@ class BlogDateFilterContent(models.Model):
     
     def render(self, **kwargs):
         dates_dict = SortedDict()
-        entry_dates = Entry.objects.active().order_by('published_on')\
+        entry_dates = Entry.objects.active().order_by('-published_on')\
                                    .values_list('published_on', flat=True)
         
         for date in entry_dates:

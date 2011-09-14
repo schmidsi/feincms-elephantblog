@@ -46,7 +46,7 @@ def entry_list(request, category=None, year=None, month=None, day=None, page=0,
     extra_context = {}
 
     if 'displayed_categories' in request._feincms_extra_context:
-        queryset = Entry.objects.active().filter(categories__in=request._feincms_extra_context['displayed_categories'])
+        queryset = Entry.objects.active().filter(categories__in=request._feincms_extra_context['displayed_categories']).annotate()
     else:
         queryset = Entry.objects.active()
     

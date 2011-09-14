@@ -45,14 +45,19 @@ def entry_list(request, category=None, year=None, month=None, day=None, page=0,
                language_code=None, exclude=None, **kwargs):
     extra_context = {}
 
+    if 'displayed_categories' in request._feincms_extra_context:
+        queryset = Entry.objects.active().filter(categories__in=request._feincms_extra_context['displayed_categories'])
+    else:
+        queryset = Entry.objects.active()
+    
     if language_code:
-        queryset = Entry.objects.active().filter(language=language_code)
+        queryset = queryset.filter(language=language_code)
     else:
         try:
             language_code = request._feincms_page.language
-            queryset = Entry.objects.active().filter(language=language_code)
+            queryset = queryset.filter(language=language_code)
         except (AttributeError, FieldError):
-            queryset = Entry.objects.active()
+            pass
         """ You can define a dict of fields and values to exclude. """
     if exclude:
         queryset = queryset.exclude(**exclude)
@@ -81,6 +86,11 @@ def entry_list(request, category=None, year=None, month=None, day=None, page=0,
                           'comments' : settings.BLOG_COMMENTS})
 
     extra_context.update({'base_template': base_template(request, template_name)})
+
+    if 'template' in request._feincms_extra_context:
+        template_setting = request._feincms_extra_context['template']
+        if template_setting:
+            template_name = template_setting
 
     return list_detail.object_list(
       request,

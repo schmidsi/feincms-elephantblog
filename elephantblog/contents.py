@@ -33,9 +33,15 @@ class BlogDateFilterContent(models.Model):
         verbose_name = _('Blog date filter content')
         verbose_name_plural = _('Blog date filter contents')
     
-    def render(self, **kwargs):
+    def render(self, request, **kwargs):
         dates_dict = SortedDict()
-        entry_dates = Entry.objects.active().order_by('-published_on')\
+
+        if 'displayed_categories' in request._feincms_extra_context:
+            queryset = Entry.objects.active().filter(categories__in=request._feincms_extra_context['displayed_categories'])
+        else:
+            queryset = Entry.objects.active()
+
+        entry_dates = queryset.order_by('-published_on')\
                                    .values_list('published_on', flat=True)
         
         for date in entry_dates:
@@ -52,3 +58,19 @@ class BlogDateFilterContent(models.Model):
         
         return render_to_string('content/blog/date_filter.html', 
                                 {'content' : self, 'dates_dict' : dates_dict})
+
+
+class BlogCategoriesFilterContent(models.Model):
+    class Meta:
+        abstract = True
+        verbose_name = _('Blog categories filter')
+        verbose_name_plural = _('Blog categories filter')
+
+    def render(self, request, **kwargs):
+        if 'displayed_categories' in request._feincms_extra_context:
+            categories = Category.objects.filter(id__in=request._feincms_extra_context['displayed_categories'])
+        else:
+            categories = Category.objects.all()
+
+        return render_to_string('content/blog/category_filter.html',
+                               {'content' : self, 'categories' : categories})

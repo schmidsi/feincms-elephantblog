@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -7,7 +8,7 @@ from django.core.urlresolvers import NoReverseMatch
 from django.core.validators import ValidationError
 from django.db import models
 from django.db.models import signals, Q
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify, capfirst
 from django.utils.translation import ugettext_lazy as _, ugettext, \
     get_language, ungettext
 
@@ -360,3 +361,31 @@ class EntryAdmin(editor.ItemEditor):
 Entry.register_regions(
                 ('main', _('Main content area')),
                 )
+
+
+def get_elephantblog_admin_fields(form, *args, **kwargs):
+    return {
+        'exclusive_subpages': forms.BooleanField(
+            label=capfirst(_('exclusive subpages')),
+            required=False,
+            initial=form.instance.parameters.get('exclusive_subpages', False),
+            help_text=_('Exclude everything other than the application\'s content when rendering subpages.'),
+        ),
+        'displayed_categories' : forms.MultipleChoiceField(
+            label=capfirst(_('displayed categories')),
+            required=False,
+            initial=form.instance.parameters.get('displayed_categories', []),
+            help_text=_('Choose which categories do you want to display. If empty, all categories will be displayed'),
+            choices=[(category.id, category.translation.title) for category in Category.objects.all()],
+        ),
+        'template' : forms.ChoiceField(
+            label=capfirst(_('template')),
+            required=False,
+            initial=form.instance.parameters.get('template', ''),
+            help_text=_('Specify a template, which renders the entry list.'),
+            choices=(
+                ('blog/entry_list.html', _('Standard with preview and link to detail')),
+                ('blog/entry_list_full.html', _('All entries full displayed, no detail link')),
+            )
+        )
+     }
